@@ -3,29 +3,69 @@ const connectDB = require('./config/db')
 connectDB();
 
 const express = require('express');
+const User = require("./models/User");
 
 const app = express();
 
+app.use(express.json())
 
+app.post("/signup",async (req,res)=>{
 
+    const user = new User(req.body)
+console.log(user)
+try {
+    await user.save();
+    res.send("Creatd success")
+} catch (error) {
+    res.send(error.message)
+}
+})
 
-app.use('/',(req,res,next) => {
-    const token = 'xyz';
-    const authorized = token ;
-    if(authorized === token){
-        res.send("aithorized")
+app.get('/user', async (req,res) => {
+    
+  const userEmail = req.body.emailID;
 
-    }else{
-        next();
+    try {
+        const user = await User.findOne({emailID:userEmail})
+        res.send(user)
+        console.log(user)
+    } catch (error) {
+        res.send(error.message)
     }
+
+
 })
 
-app.get('/admin/getUser',(req,res) => {
-    res.send("Got all data")
+app.patch('/user/:id',async (req,res) => {
+   const userId = req.params.id;
+   const {firstName} = req.body;
+
+   try {
+    const user = await User.findByIdAndUpdate(userId,{
+        firstName:firstName,
+    //   new:true
+    })
+
+    res.send(user)
+   } catch (error) {
+    res.send(error.message)
+   }
+
+
 })
 
-app.get('/admin/deleteUser', (req,res) =>{
-    res.send("deleted user")
+
+app.get('/feed', async (req,res) => {
+
+ 
+    try{
+   const user = await User.find({})
+   res.send(user)
+
+    }
+    catch (error) {
+        res.send(error.message)
+    }
 })
 
 app.listen(3000,()=>{
