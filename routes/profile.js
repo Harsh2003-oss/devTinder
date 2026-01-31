@@ -1,19 +1,11 @@
 const express = require('express')
+const  profileRouter  = express.Router ();
+const {userAuth} = require('../middlewares/auth')
+const {profileView,profileUpdate,updatePassword} = require('../controller/profileController')
+const {validatePasswordInput} = require('../utils/valdation')
 
-const  profileRouter = express.Router();
-const {userAuth }= require('../middlewares/auth')
+profileRouter .get('/view',userAuth,profileView);
+profileRouter .patch('/edit',userAuth,profileUpdate)
+profileRouter.patch('/updatePassword',userAuth,validatePasswordInput,updatePassword)
 
-profileRouter.get('/profile', userAuth,async (req,res) =>{
-
-    try {
-        const user = req.user;
-        res.send(user)
-
-
-    } catch (error) {
-          res.status(400).send(error.message)
-    }
-
-})
-
-module.exports = profileRouter;
+module.exports = profileRouter ;
