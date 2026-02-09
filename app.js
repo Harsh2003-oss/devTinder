@@ -8,12 +8,13 @@ const authRouter = require('./routes/auth')
 const profileRouter = require("./routes/profile")
 const requestRouter = require('./routes/requests')
 const userRouter = require('./routes/user')
+const messageRouter = require('./routes/messageRouter');
 const app = express();
 
 
 app.use(cors({
   origin: 'http://localhost:5173', 
-  methods: ['GET', 'POST'],        
+  methods: ['GET', 'POST' ,'PUT','PATCH', 'DELETE'],        
   credentials: true                
 }));
 
@@ -24,7 +25,7 @@ app.use("/api",authRouter);
 app.use('/api',profileRouter);
 app.use('/api',requestRouter);
 app.use('/api',userRouter);
-
+app.use('/api', messageRouter);
 
 
 
