@@ -6,6 +6,8 @@ const ConnectionRequest = require('../models/connectionRequest')
 const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills"
 const User = require('../models/User')
 
+const {calculateMatchScore} = require('../services/matchingEngine')
+
 userRouter.get("/user/requests/received",userAuth,async (req,res) => {
     try {
         const loggedInUser = req.user;
@@ -97,49 +99,19 @@ const users = await User.find({
     ]
 }).select(USER_SAFE_DATA).skip(skip).limit(limit);
 
-
 const usersWithMatchScore = users.map(user => {
-    const loggedInSkills = loggedInUser.skills || [];
-    const userSkills = user.skills || [];
-
-    const commonSkills = loggedInSkills.filter(skill =>
-        userSkills.includes(skill)
-    );
-
-    const allSkills = new Set([
-        ...loggedInSkills,
-        ...userSkills
-    ]);
-
-    let baseSimilarity = allSkills.size > 0
-        ? (commonSkills.length / allSkills.size)
-        : 0;
-
-  
-    const rareSkills = ["TensorFlow", "Rust", "Kubernetes", "Docker", "AWS"];
-
-    let rareBoost = 0;
-
-    commonSkills.forEach(skill => {
-        if (rareSkills.includes(skill)) {
-            rareBoost += 0.05; // +5% per rare match
-        }
-    });
-
-    let premiumBoost = user.isPremium ? 0.05 : 0;
-
-    let finalScore = baseSimilarity + rareBoost + premiumBoost;
+    const score = calculateMatchScore(loggedInUser, user);
 
     return {
         ...user.toObject(),
-        matchScore: Math.round(finalScore * 100)
+        matchScore: score
     };
 });
 
-// Sort descending
 usersWithMatchScore.sort((a, b) => b.matchScore - a.matchScore);
 
 res.send(usersWithMatchScore);
+
 
 
     } catch (error) {
