@@ -97,7 +97,37 @@ const users = await User.find({
     ]
 }).select(USER_SAFE_DATA).skip(skip).limit(limit);
 
-res.send(users);
+
+const usersWithMatchScore = users.map(user => {
+    const loggedInSkills = loggedInUser.skills || [];
+    const userSkills = user.skills || [];
+
+    // Find common skills
+    const commonSkills = loggedInSkills.filter(skill =>
+        userSkills.includes(skill)
+    );
+
+    // Combine both skill arrays and remove duplicates
+    const allSkills = new Set([
+        ...loggedInSkills,
+        ...userSkills
+    ]);
+
+    const similarity = allSkills.size > 0
+        ? (commonSkills.length / allSkills.size) * 100
+        : 0;
+
+    return {
+        ...user.toObject(),
+        matchScore: Math.round(similarity)
+    };
+});
+
+// Sort descending
+usersWithMatchScore.sort((a, b) => b.matchScore - a.matchScore);
+
+res.send(usersWithMatchScore);
+
 
     } catch (error) {
          res.status(400).send(error.message)
