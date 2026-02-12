@@ -25,6 +25,10 @@ const profileUpdate = async (req, res) => {
 
     await loggedInUser.save();
 
+    const { buildSkillWeights } = require("../services/skillWeightService");
+await buildSkillWeights();
+
+
     res.json({
       message: `${loggedInUser.firstName}, your profile updated successfully`,
       data: loggedInUser,

@@ -1,6 +1,11 @@
 require("dotenv").config();//Load environment variables
 const connectDB = require('./config/db')
-connectDB();
+const { buildSkillWeights } = require("./services/skillWeightService");
+
+connectDB().then(async () => {
+  await buildSkillWeights();
+});
+
 const express = require('express');
 const cors = require('cors'); 
 const User = require("./models/User");
