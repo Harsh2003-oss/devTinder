@@ -102,6 +102,8 @@ const users = await User.find({
 const usersWithMatchScore = users.map(user => {
     const score = calculateMatchScore(loggedInUser, user);
 
+    console.log(`User: ${user.email} → Score: ${score}`);
+
     return {
         ...user.toObject(),
         matchScore: score
@@ -109,6 +111,12 @@ const usersWithMatchScore = users.map(user => {
 });
 
 usersWithMatchScore.sort((a, b) => b.matchScore - a.matchScore);
+
+console.log("Sorted Results:", usersWithMatchScore.map(u => ({
+    email: u.email,
+    score: u.matchScore
+})));
+
 
 res.send(usersWithMatchScore);
 
